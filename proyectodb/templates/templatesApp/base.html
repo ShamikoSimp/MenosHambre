@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'app/Inicio.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <title>{% block title %}Menos Hambre{% endblock %}</title>
+    <style>
+        .navbar-nav .nav-item .dropdown-menu {
+            z-index: 2000;
+            min-width: 12rem;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu.dropdown-menu-end {
+            right: 0;
+            left: auto;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm rounded-bottom border-bottom border-3 border-info py-2">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'inicio' %}">
+                    <img src="{% static 'images/logo.jpg' %}" alt="Logo" width="44" height="44" class="rounded-circle border border-2 border-white shadow-sm">
+                    <span class="fw-bold fs-4 text-white">Menos Hambre</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-2">
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center gap-1" aria-current="page" href="#"><i class="bi bi-people-fill"></i> Nosotros</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center gap-1" href="#"><i class="bi bi-person-heart"></i> Socios</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center gap-1" href="{% url 'publicaciones' %}"><i class="bi bi-megaphone"></i> Publicaciones</a>
+                        </li>
+                        {% if request.session.id_usuario and request.session.tipo_usuario == 'organizacion' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center gap-1" href="{% url 'beneficiarios' %}"><i class="bi bi-people"></i> Beneficiarios</a>
+                        </li>
+                        {% endif %}
+                        {% if request.session.id_usuario %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle"></i>
+                                {{ request.session.display_name|default:"Usuario" }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'usuario' %}"><i class="bi bi-person-badge"></i> Ver perfil</a></li>
+                                <li><a href="{% url 'gestion' %}" class="dropdown-item"><i class="bi bi-card-list"></i> Ver publicaciones realizadas</a></li>
+                                {% if request.session.es_admin %}
+                                <li><a href="{% url 'admin_gestion' %}" class="dropdown-item"><i class="bi bi-shield-lock"></i> Panel de Administración</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'cerrar_sesion' %}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-plus"></i> Registrar
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'registro' %}?tipo=usuario"><i class="bi bi-person"></i> Como Usuario individual</a></li>
+                                <li><a class="dropdown-item" href="{% url 'registro' %}?tipo=organizacion"><i class="bi bi-building"></i> Como Organización</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light" href="{% url 'acceso' %}">Iniciar Sesión</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-primary text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Menos Hambre</h5>
+                    <p>Trabajando juntos para un futuro sin hambre</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2025 Menos Hambre. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

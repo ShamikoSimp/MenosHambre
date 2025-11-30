@@ -1,0 +1,216 @@
+/* Estilos globales y contenedor principal */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+.main-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Estilos del carrusel y hero */
+.carrusel-pequeno {
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.08);
+}
+
+.carrusel-img {
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.carrusel-overlay {
+  position: relative;
+}
+
+.carrusel-texto {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: white;
+  padding: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Cards de características principales */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  max-width: 1100px;
+}
+
+.card-efecto {
+  border: none !important;
+  border-radius: 12px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  background: #ffffff !important;
+}
+
+.card-efecto:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.12) !important;
+}
+
+.sombra-card {
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+/* Estilo para las publicaciones en la página de inicio */
+.publicacion-card {
+  border-radius: 1.1rem;
+  border: none;
+  box-shadow: 0 4px 16px 0 rgba(37, 99, 235, 0.10);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.5rem;
+  height: 100%;
+}
+
+.publicacion-card:hover {
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.12);
+  transform: translateY(-6px);
+}
+.publicacion-card .card-title {
+  font-weight: 700;
+  color: #2563eb;
+}
+.publicacion-card .badge {
+  font-size: 0.95rem;
+  margin-right: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+.publicacion-card .card-text {
+  color: #334155;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.card-efecto {
+  border-radius: 1rem;
+  border: none;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.card-efecto:hover {
+  box-shadow: 0 8px 32px 0 rgba(60, 60, 120, 0.15);
+  transform: translateY(-6px) scale(1.03);
+}
+
+.sombra-card {
+  box-shadow: 0 2px 8px 0 rgba(60, 60, 120, 0.10);
+}
+
+.btn-primary, .btn-success, .btn-warning {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px 0 rgba(60, 60, 120, 0.08);
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+.btn-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+.btn-success {
+  background-color: #22c55e;
+  border-color: #22c55e;
+}
+.btn-success:hover {
+  background-color: #16a34a;
+  border-color: #16a34a;
+}
+.btn-warning {
+  background-color: #f59e42;
+  border-color: #f59e42;
+  color: #fff;
+}
+.btn-warning:hover {
+  background-color: #d97706;
+  border-color: #d97706;
+  color: #fff;
+}
+
+.carrusel-pequeno {
+  max-width: 400px;
+  margin: 0 auto 1.5rem auto;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(60, 60, 120, 0.10);
+}
+.carrusel-pequeno .carrusel-img {
+  height: 180px;
+  object-fit: cover;
+}
+.carrusel-overlay {
+  position: relative;
+}
+.carrusel-texto {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(37, 99, 235, 0.7);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.footer {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 1rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 2rem;
+}
+
+.carrusel-pequeno {
+  max-width: 600px;   /* Ajusta el ancho */
+  margin: 0 auto;     /* Centra el carrusel */
+}
+.carrusel-pequeno .carousel-item img {
+  height: 400px;      /* Ajusta la altura de las imágenes */
+  object-fit: cover;  /* Recorta la imagen si es necesario */
+}
+
+.div-superior {
+  margin-bottom: 20px; /* Crea un espacio de 20px debajo del div superior */
+}
+.div-inferior {
+  margin-top: 20px; /* Crea un espacio de 20px encima del div inferior */
+}

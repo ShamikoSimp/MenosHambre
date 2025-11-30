@@ -1,0 +1,116 @@
+{% extends 'templatesApp/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Gestión de Publicaciones (Panel de Administrador)</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Tipo de Usuario</th>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for publicacion in publicaciones %}
+                <tr>
+                    <td>{{ publicacion.id_publicacion }}</td>
+                    <td>{{ publicacion.titulo }}</td>
+                    <td>
+                        {% if publicacion.autor.tipo_usuario == 'usuario' %}
+                            {{ publicacion.autor_detalle.nombre }} {{ publicacion.autor_detalle.apellido }}
+                        {% elif publicacion.autor.tipo_usuario == 'organizacion' %}
+                            {{ publicacion.autor_detalle.razon_social }}
+                        {% else %}
+                            {{ publicacion.autor.email }}
+                        {% endif %}
+                    </td>
+                    <td>{{ publicacion.autor.tipo_usuario }}</td>
+                    <td>{{ publicacion.fecha_publicacion }}</td>
+                    <td>{{ publicacion.tipo_publicacion }}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ publicacion.id_publicacion }}">
+                            Editar
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ publicacion.id_publicacion }}">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Modal de Edición -->
+                <div class="modal fade" id="editModal{{ publicacion.id_publicacion }}" tabindex="-1" aria-labelledby="editModalLabel{{ publicacion.id_publicacion }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editModalLabel{{ publicacion.id_publicacion }}">Editar Publicación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="POST" action="{% url 'editar_publicacion' publicacion.id_publicacion %}">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="titulo" class="form-label">Título</label>
+                                        <input type="text" class="form-control" id="titulo" name="titulo" value="{{ publicacion.titulo }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="descripcion" class="form-label">Descripción</label>
+                                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>{{ publicacion.descripcion }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="direccion" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="direccion" name="direccion" value="{{ publicacion.direccion }}">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal de Eliminación -->
+                <div class="modal fade" id="deleteModal{{ publicacion.id_publicacion }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ publicacion.id_publicacion }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel{{ publicacion.id_publicacion }}">Confirmar Eliminación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Está seguro que desea eliminar la publicación "{{ publicacion.titulo }}"?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <form method="POST" action="{% url 'eliminar_publicacion' publicacion.id_publicacion %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

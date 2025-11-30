@@ -1,0 +1,181 @@
+from django import forms
+from django.core.exceptions import ValidationError
+import re
+from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario
+# --- FORMULARIO PUBLICACION ---
+class PublicacionForm(forms.ModelForm):
+    class Meta:
+        model = Publicacion
+        fields = ['titulo', 'descripcion', 'direccion']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+        }
+
+# --- FORMULARIO DE ACCESO ---
+class AccesoForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'name@example.com'}),
+        label="Email"
+    )
+    contrasena = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña'}),
+        label="Contraseña"
+    )
+
+
+# --- FORMULARIO BASE USUARIO ---
+class UsuarioForm(forms.ModelForm):
+    contrasena = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'minlength': '8'}),
+        label="Contraseña",
+        help_text="Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial."
+    )
+    confirmar_contrasena = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'minlength': '8'}),
+        label="Confirmar contraseña"
+    )
+
+    class Meta:
+        model = Usuario
+        fields = ['email', 'contrasena']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if email:
+            # Validar que el email tenga un dominio válido
+            if '@' not in email or '.' not in email.split('@')[1]:
+                raise ValidationError("Por favor, ingresa un correo electrónico válido con un dominio válido.")
+        return email
+
+    def clean_contrasena(self):
+        password = self.cleaned_data.get("contrasena")
+        if password:
+            # Validar requisitos de contraseña
+            if len(password) < 8:
+                raise ValidationError("La contraseña debe tener mínimo 8 caracteres.")
+            if not re.search(r'[A-Z]', password):
+                raise ValidationError("La contraseña debe contener al menos una mayúscula.")
+            if not re.search(r'[a-z]', password):
+                raise ValidationError("La contraseña debe contener al menos una minúscula.")
+            if not re.search(r'[0-9]', password):
+                raise ValidationError("La contraseña debe contener al menos un número.")
+            if not re.search(r'[!@#$%^&*()_+\-=\[\]{};:\'\"<>,.?/\\|`~]', password):
+                raise ValidationError("La contraseña debe contener al menos un carácter especial (!@#$%^&* etc).")
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("contrasena")
+        confirmar = cleaned_data.get("confirmar_contrasena")
+
+        if password and confirmar and password != confirmar:
+            raise ValidationError("Las contraseñas no coinciden.")
+        return cleaned_data
+
+
+# --- FORMULARIO USUARIO NORMAL ---
+class UsuarioNormalForm(forms.ModelForm):
+    class Meta:
+        model = UsuarioNormal
+        fields = ['nombre', 'apellido', 'telefono']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'apellido': forms.TextInput(attrs={'class': 'form-control'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get("nombre")
+        if any(char.isdigit() for char in nombre):
+            raise ValidationError("El nombre no puede contener números.")
+        return nombre
+
+    def clean_apellido(self):
+        apellido = self.cleaned_data.get("apellido")
+        if any(char.isdigit() for char in apellido):
+            raise ValidationError("El apellido no puede contener números.")
+        return apellido
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get("telefono")
+        if telefono:
+            # Convertir a string para validar
+            telefono_str = str(telefono)
+            if len(telefono_str) < 9:
+                raise ValidationError("El teléfono debe tener mínimo 9 caracteres.")
+            if not telefono_str.isdigit():
+                raise ValidationError("El teléfono no puede contener letras, solo números.")
+        return telefono
+
+
+
+# --- FORMULARIO ORGANIZACIÓN ---
+class OrganizacionForm(forms.ModelForm):
+    class Meta:
+        model = Organizacion
+        fields = ['razon_social', 'rut', 'telefono_contacto', 'direccion', 'tipo_entidad']
+        widgets = {
+            'razon_social': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+            'rut': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+            'telefono_contacto': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+            'tipo_entidad': forms.TextInput(attrs={'class': 'form-control', 'required': 'required'}),
+        }
+
+    def clean_razon_social(self):
+        razon_social = self.cleaned_data.get("razon_social")
+        if not razon_social or not razon_social.strip():
+            raise ValidationError("La razón social no puede quedar vacía.")
+        return razon_social
+
+    def clean_rut(self):
+        rut = self.cleaned_data.get("rut")
+        if not rut or not rut.strip():
+            raise ValidationError("El RUT no puede quedar vacío.")
+        if any(char.isalpha() for char in rut.replace('-', '').replace('.', '')):
+            raise ValidationError("El RUT no puede contener letras, solo números y guiones.")
+        return rut
+
+    def clean_telefono_contacto(self):
+        telefono = self.cleaned_data.get("telefono_contacto")
+        if not telefono or not telefono.strip():
+            raise ValidationError("El teléfono no puede quedar vacío.")
+        telefono_str = str(telefono).replace(' ', '').replace('-', '')
+        if len(telefono_str) < 9:
+            raise ValidationError("El teléfono debe tener mínimo 9 caracteres.")
+        if not telefono_str.isdigit():
+            raise ValidationError("El teléfono no puede contener letras, solo números.")
+        return telefono
+
+    def clean_direccion(self):
+        direccion = self.cleaned_data.get("direccion")
+        if not direccion or not direccion.strip():
+            raise ValidationError("La dirección no puede quedar vacía.")
+        return direccion
+
+    def clean_tipo_entidad(self):
+        tipo_entidad = self.cleaned_data.get("tipo_entidad")
+        if not tipo_entidad or not tipo_entidad.strip():
+            raise ValidationError("El tipo de entidad no puede quedar vacío.")
+        if any(char.isdigit() for char in tipo_entidad):
+            raise ValidationError("El tipo de entidad no puede contener números.")
+        return tipo_entidad
+
+
+# --- FORMULARIO BENEFICIARIO ---
+class BeneficiarioForm(forms.ModelForm):
+    class Meta:
+        model = Beneficiario
+        fields = ['nombre', 'tipo', 'telefono', 'direccion', 'comuna']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre completo'}),
+            'tipo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tipo de beneficio'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'}),
+            'comuna': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Comuna'}),
+        }

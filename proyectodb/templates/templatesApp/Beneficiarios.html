@@ -1,0 +1,98 @@
+{% extends 'templatesApp/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main-container">
+  <div class="container mt-4">
+    <h2 class="h3 mb-4">Gestión de Beneficiarios</h2>
+
+    <!-- Listado de Beneficiarios -->
+    <div class="card card-body mb-4">
+      <h5 class="card-title mb-3">Beneficiarios Registrados</h5>
+      {% if beneficiarios %}
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-primary">
+            <tr>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Tipo de Beneficio(s)</th>
+              <th>Teléfono</th>
+              <th>Comuna</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for beneficiario in beneficiarios %}
+            <tr>
+              <td>{{ beneficiario.nombre }}</td>
+              <td>{{ beneficiario.direccion }}</td>
+              <td>{{ beneficiario.tipo }}</td>
+              <td>{{ beneficiario.telefono }}</td>
+              <td>{{ beneficiario.comuna }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No hay beneficiarios registrados aún.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Formulario para Añadir Beneficiario -->
+    <div class="card card-body">
+      <h5 class="card-title mb-3">Añadir Nuevo Beneficiario</h5>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre Completo</label>
+            {{ form.nombre }}
+            {% if form.nombre.errors %}
+              <div class="text-danger small">{{ form.nombre.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label for="{{ form.tipo.id_for_label }}" class="form-label">Tipo de Beneficio(s)</label>
+            {{ form.tipo }}
+            {% if form.tipo.errors %}
+              <div class="text-danger small">{{ form.tipo.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label for="{{ form.telefono.id_for_label }}" class="form-label">Teléfono</label>
+            {{ form.telefono }}
+            {% if form.telefono.errors %}
+              <div class="text-danger small">{{ form.telefono.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label for="{{ form.direccion.id_for_label }}" class="form-label">Dirección</label>
+            {{ form.direccion }}
+            {% if form.direccion.errors %}
+              <div class="text-danger small">{{ form.direccion.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-12">
+            <label for="{{ form.comuna.id_for_label }}" class="form-label">Comuna</label>
+            {{ form.comuna }}
+            {% if form.comuna.errors %}
+              <div class="text-danger small">{{ form.comuna.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12">
+            <button type="submit" class="btn btn-success btn-lg w-100">Guardar Beneficiario</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+{% endblock %}

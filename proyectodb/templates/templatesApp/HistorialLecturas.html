@@ -1,0 +1,111 @@
+{% extends 'templatesApp/base.html' %}
+
+{% block title %}Historial de Lecturas de Voz{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>📖 Historial de Lecturas de Texto a Voz</h1>
+            <p class="text-muted">Total de lecturas registradas: <strong>{{ total_lecturas }}</strong></p>
+        </div>
+    </div>
+
+    {% if lecturas %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Publicación ID</th>
+                    <th>Título</th>
+                    <th>Texto (primeras 100 caracteres)</th>
+                    <th>Usuario</th>
+                    <th>Tipo Usuario</th>
+                    <th>Fecha y Hora</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lectura in lecturas %}
+                <tr>
+                    <td>
+                        <span class="badge bg-info">{{ lectura.id_publicacion }}</span>
+                    </td>
+                    <td>
+                        <strong>{{ lectura.titulo }}</strong>
+                    </td>
+                    <td>
+                        <small>{{ lectura.texto|truncatewords:15 }}</small>
+                    </td>
+                    <td>
+                        {% if lectura.id_usuario %}
+                            <a href="mailto:{{ lectura.usuario_email }}">{{ lectura.usuario_email }}</a>
+                        {% else %}
+                            <span class="text-muted">Anónimo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if lectura.tipo_usuario %}
+                            <span class="badge bg-secondary">{{ lectura.tipo_usuario|title }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small>{{ lectura.fecha_hora }}</small>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <button class="btn btn-primary" onclick="descargarJSON()">
+                <i class="bi bi-download"></i> Descargar como JSON
+            </button>
+            <button class="btn btn-secondary" onclick="imprimirHistorial()">
+                <i class="bi bi-printer"></i> Imprimir
+            </button>
+            <a href="{% url 'admin_gestion' %}" class="btn btn-outline-secondary">
+                Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">Sin registros</h4>
+        <p>No hay lecturas de texto a voz registradas aún.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function descargarJSON() {
+    const lecturas = {{ lecturas|safe }};
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(lecturas, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "historial_lecturas_" + new Date().toISOString().split('T')[0] + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
+
+function imprimirHistorial() {
+    window.print();
+}
+</script>
+
+<style>
+    @media print {
+        .btn, .btn-group {
+            display: none;
+        }
+        body {
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}
