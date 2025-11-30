@@ -1,6 +1,18 @@
+# Django y DRF
 Django==5.1.5
 djangorestframework==3.14.0
+
+# Configuración y variables de entorno
 python-dotenv==1.0.0
+
+# APIs y servicios externos
 sib-api-v3-sdk==7.5.0
+requests==2.31.0
+
+# Bases de datos
 mysqlclient==2.2.0
 PyMySQL==1.1.0
+psycopg2-binary==2.9.9
+
+# Servicio de archivos estáticos (producción)
+whitenoise==6.6.0
