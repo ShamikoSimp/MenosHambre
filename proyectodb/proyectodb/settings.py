@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 # Hosts permitidos
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1, localhost').split(',') # Modificar el primer valor por la IP del host donde se desplegara la aplicacion
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',') # Modificar el primer valor por la IP del host donde se desplegara la aplicacion
 
 # Configuraciones de Seguridad
 SECURE_SSL_REDIRECT = False  # Cambiar a True en producción si tienes HTTPS
