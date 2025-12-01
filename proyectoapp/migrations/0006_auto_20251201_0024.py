@@ -6,13 +6,13 @@ def crear_superusuario(apps, schema_editor):
         User.objects.create_superuser(
             username="admin",
             email="admin@example.com",
-            password="Admin1234!"
+            password="Admin123"
         )
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('proyectoapp', '000X_nombre_migracion_anterior'),  # Ajusta esto
+        ('proyectoapp', '0005_donacion_fecha_donacion_publicacion_hora_and_more.py'),  # Ajusta esto
     ]
 
     operations = [
