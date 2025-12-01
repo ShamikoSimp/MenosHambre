@@ -1,11 +1,38 @@
 from django.contrib import admin
+from django import forms
 from proyectoapp.models import Usuario, Publicacion, UsuarioNormal, Organizacion, Municipalidad
 
+class UsuarioForm(forms.ModelForm):
+    """
+    Formulario personalizado para el modelo Usuario.
+    Permite cambiar la contraseña de forma segura con validación.
+    """
+    contrasena = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'vTextField'}),
+        help_text="Introduce una nueva contraseña. Será hasheada automáticamente.",
+        required=False,
+        label="Contraseña"
+    )
+    
+    class Meta:
+        model = Usuario
+        fields = '__all__'
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Si se ingresó una contraseña, se actualiza
+        if self.cleaned_data['contrasena']:
+            user.set_password(self.cleaned_data['contrasena'])
+        if commit:
+            user.save()
+        return user
+
+
 class UsuarioAdmin(admin.ModelAdmin):
+    form = UsuarioForm
     list_display = ['email', 'tipo_usuario', 'es_admin']
     list_filter = ['tipo_usuario', 'es_admin']
     search_fields = ['email']
-    readonly_fields = ['contrasena']
     fields = ['email', 'contrasena', 'tipo_usuario', 'es_admin']
 
 class UsuarioNormalAdmin(admin.ModelAdmin):
