@@ -56,38 +56,6 @@
     </div>
   </div>
   {% endif %}
-  <!-- Card de donación: solo visible para usuarios no logueados o no-admin -->
-  {% if not request.session.id_usuario or not request.session.es_admin %}
-  <div class="card card-efecto sombra-card" style="width: 18rem; background: #f8fafc;">
-    <img src="{% static 'images/donacion.jpg' %}" class="card-img-top" alt="...">
-    <div class="card-body">
-      <h5 class="card-title text-success">Aporta donaciones!</h5>
-      <p class="card-text">Realiza un aporte monetario para continuar apoyando familias.</p>
-      {% if request.session.id_usuario %}
-        <div class="d-grid">
-          <a href="#" class="btn btn-success btn-lg w-100">Donar dinero</a>
-          <hr class="my-2" style="border-top:1px solid rgba(0,0,0,.08);">
-          <a href="#" class="btn btn-outline-success btn-lg w-100">Donar en especie</a>
-        </div>
-      {% else %}
-        <div class="alert alert-info" role="alert">
-          <i class="bi bi-info-circle"></i> Inicia sesión para donar
-        </div>
-        <div class="d-grid">
-          <a href="{% url 'registro' %}?tipo=usuario" class="btn btn-primary btn-lg w-100">Registrar como Usuario individual</a>
-          <hr class="my-2" style="border-top:1px solid rgba(0,0,0,.08);">
-          <a href="{% url 'registro' %}?tipo=organizacion" class="btn btn-primary btn-lg w-100">Registrar como Organizacion</a>
-        </div>
-        
-        <div class="mt-3 text-center">
-    <p>¿Ya tienes una cuenta? <a href="{% url 'acceso' %}" class="text-primary">Inicia sesión aquí</a></p>
-  </div>
-      {% endif %}
-    </div>
-  </div>
-  {% endif %}
-</div>
-</div>
   <!--Publicaciones-->
   <div class="publicaciones-container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
