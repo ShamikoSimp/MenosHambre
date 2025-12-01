@@ -475,8 +475,24 @@ def leer_publicacion(request, id_publicacion):
     if not voicerss_key:
         return HttpResponse("VoiceRSS no está configurado", status=500)
 
-    # Texto a leer (título + descripción)
-    texto = f"{publicacion.titulo}. {publicacion.descripcion}"
+    # Texto a leer: título + descripción + dirección (si existe)
+    partes = []
+    if getattr(publicacion, 'titulo', None):
+        partes.append(str(publicacion.titulo).strip())
+    if getattr(publicacion, 'descripcion', None):
+        partes.append(str(publicacion.descripcion).strip())
+    # Agregar dirección con etiqueta para mejorar claridad en la lectura
+    if getattr(publicacion, 'direccion', None):
+        direccion = str(publicacion.direccion).strip()
+        if direccion:
+            partes.append(f"Dirección: {direccion}")
+    # Agregar comuna si está disponible
+    if getattr(publicacion, 'comuna', None):
+        comuna = str(publicacion.comuna).strip()
+        if comuna:
+            partes.append(f"Comuna: {comuna}")
+
+    texto = ". ".join(partes)
 
     # Llamada a VoiceRSS
     url = "https://api.voicerss.org/"
