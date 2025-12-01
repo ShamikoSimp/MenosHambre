@@ -6,8 +6,8 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from functools import wraps
-from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario
-from .forms import UsuarioForm, UsuarioNormalForm, OrganizacionForm, AccesoForm, PublicacionForm, BeneficiarioForm
+from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria
+from .forms import UsuarioForm, UsuarioNormalForm, OrganizacionForm, AccesoForm, PublicacionForm, BeneficiarioForm, DonacionForm, DonacionMonetariaForm
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -344,6 +344,42 @@ def acceso(request):
                 form.add_error("email", "No existe una cuenta con este email.")
     return render(request, "templatesApp/Acceder.html", {"form": form})
 
+
+def donacion(request):
+    """Vista para manejar donaciones alimenticias y monetarias."""
+    if not request.session.get('id_usuario'):
+        messages.error(request, "Debes iniciar sesión para realizar una donación.")
+        return redirect('acceso')
+    
+    tipo_donacion = request.POST.get('tipo_donacion') or request.GET.get('tipo_donacion') or 'alimenticia'
+    usuario = Usuario.objects.get(id_usuario=request.session['id_usuario'])
+    
+    if request.method == 'POST':
+        if tipo_donacion == 'alimenticia':
+            form = DonacionForm(request.POST)
+            if form.is_valid():
+                donacion_obj = form.save(commit=True)
+                messages.success(request, '¡Donación alimenticia registrada exitosamente!')
+                return redirect('inicio')
+        elif tipo_donacion == 'monetaria':
+            form = DonacionMonetariaForm(request.POST)
+            if form.is_valid():
+                donacion_monetaria = form.save(commit=False)
+                donacion_monetaria.id_usuario = usuario
+                donacion_monetaria.save()
+                messages.success(request, '¡Donación monetaria registrada exitosamente!')
+                return redirect('inicio')
+    else:
+        if tipo_donacion == 'alimenticia':
+            form = DonacionForm()
+        else:
+            form = DonacionMonetariaForm()
+    
+    return render(request, 'templatesApp/donacion.html', {
+        'form': form,
+        'tipo_donacion': tipo_donacion
+    })
+
 @api_view(['GET','POST'])
 def usuario_list(request):
     if request.method == 'GET':
@@ -434,7 +470,6 @@ def leer_publicacion(request, id_publicacion):
         publicacion = Publicacion.objects.get(id_publicacion=id_publicacion)
     except Publicacion.DoesNotExist:
         return HttpResponse("Publicación no encontrada", status=404)
-
     # Validar que la API key de VoiceRSS esté configurada
     voicerss_key = getattr(settings, 'VOICERSS_API_KEY', None)
     if not voicerss_key:
