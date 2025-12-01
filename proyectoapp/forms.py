@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import re
-from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria, Municipalidad
+from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria, Municipalidad, Campana
 # --- FORMULARIO PUBLICACION ---
 class PublicacionForm(forms.ModelForm):
     class Meta:
