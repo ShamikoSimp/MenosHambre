@@ -49,6 +49,11 @@
             <p class="text-secondary">Elige el tipo de donación que deseas realizar</p>
           </div>
 
+          {% if error_debug %}
+          <div class="alert alert-danger" role="alert">
+            <strong>Error en el servidor:</strong> {{ error_debug }}
+          </div>
+          {% endif %}
           <!-- Button Group para seleccionar tipo de donación -->
           <div class="d-flex gap-2 mb-4 justify-content-center">
             <button type="button" class="btn btn-outline-success btn-lg donation-type-btn active" data-type="alimenticia">

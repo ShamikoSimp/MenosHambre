@@ -52,6 +52,14 @@
                             <a class="nav-link text-white d-flex align-items-center gap-1" href="{% url 'beneficiarios' %}"><i class="bi bi-people"></i> Beneficiarios</a>
                         </li>
                         {% endif %}
+                        {% if request.session.id_usuario and request.session.tipo_usuario == 'municipalidad' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center gap-1" href="{% url 'beneficiarios' %}"><i class="bi bi-people"></i> Beneficiarios</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white d-flex align-items-center gap-1" href="{% url 'campanas' %}"><i class="bi bi-megaphone"></i> Campaña</a>
+                        </li>
+                        {% endif %}
                         {% if request.session.id_usuario %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -76,6 +84,7 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{% url 'registro' %}?tipo=usuario"><i class="bi bi-person"></i> Como Usuario individual</a></li>
                                 <li><a class="dropdown-item" href="{% url 'registro' %}?tipo=organizacion"><i class="bi bi-building"></i> Como Organización</a></li>
+                                <li><a class="dropdown-item" href="{% url 'registro' %}?tipo=municipalidad"><i class="bi bi-house-check"></i> Como Municipalidad</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">

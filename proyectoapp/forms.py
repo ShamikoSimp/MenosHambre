@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import re
-from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria
+from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria, Municipalidad
 # --- FORMULARIO PUBLICACION ---
 class PublicacionForm(forms.ModelForm):
     class Meta:
@@ -222,3 +222,33 @@ class DonacionMonetariaForm(forms.ModelForm):
         if monto is not None and monto <= 0:
             raise ValidationError("El monto debe ser mayor a 0.")
         return monto
+
+
+# --- FORMULARIO MUNICIPALIDAD ---
+class MunicipalidadForm(forms.ModelForm):
+    class Meta:
+        model = Municipalidad
+        fields = ['nombre_municipalidad', 'region', 'comuna']
+        widgets = {
+            'nombre_municipalidad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la Municipalidad'}),
+            'region': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Región'}),
+            'comuna': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Comuna'}),
+        }
+    
+    def clean_nombre_municipalidad(self):
+        nombre = self.cleaned_data.get('nombre_municipalidad')
+        if not nombre or not nombre.strip():
+            raise ValidationError("El nombre de la municipalidad no puede quedar vacío.")
+        return nombre
+    
+    def clean_region(self):
+        region = self.cleaned_data.get('region')
+        if region and any(char.isdigit() for char in region):
+            raise ValidationError("La región no puede contener números.")
+        return region
+    
+    def clean_comuna(self):
+        comuna = self.cleaned_data.get('comuna')
+        if comuna and any(char.isdigit() for char in comuna):
+            raise ValidationError("La comuna no puede contener números.")
+        return comuna

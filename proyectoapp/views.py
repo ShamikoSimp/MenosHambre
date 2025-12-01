@@ -6,8 +6,9 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from functools import wraps
-from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria
-from .forms import UsuarioForm, UsuarioNormalForm, OrganizacionForm, AccesoForm, PublicacionForm, BeneficiarioForm, DonacionForm, DonacionMonetariaForm
+import traceback
+from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria, Campana
+from .forms import UsuarioForm, UsuarioNormalForm, OrganizacionForm, AccesoForm, PublicacionForm, BeneficiarioForm, DonacionForm, DonacionMonetariaForm, MunicipalidadForm, CampanaForm
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -243,7 +244,7 @@ def publicar(request):
 def registro(request):
     tipo = request.GET.get("tipo")  
 
-    if tipo not in ["usuario", "organizacion"]:
+    if tipo not in ["usuario", "organizacion", "municipalidad"]:
         messages.error(request, "Debes seleccionar un tipo de registro válido.")
         return render(request, "templatesApp/Registro.html", {"tipo": None})
 
@@ -252,6 +253,7 @@ def registro(request):
 
         normal_form = UsuarioNormalForm(request.POST) if tipo == "usuario" else UsuarioNormalForm()
         org_form = OrganizacionForm(request.POST) if tipo == "organizacion" else OrganizacionForm()
+        mun_form = MunicipalidadForm(request.POST) if tipo == "municipalidad" else MunicipalidadForm()
 
         if usuario_form.is_valid():
             usuario = usuario_form.save(commit=False)
@@ -273,6 +275,13 @@ def registro(request):
                 organizacion.save()
                 messages.success(request, "Organización registrada correctamente.")
                 return redirect("inicio")
+            
+            elif tipo == "municipalidad" and mun_form.is_valid():
+                municipalidad = mun_form.save(commit=False)
+                municipalidad.id_usuario = usuario
+                municipalidad.save()
+                messages.success(request, "Municipalidad registrada correctamente.")
+                return redirect("inicio")
 
             else:
                 usuario.delete()
@@ -285,12 +294,14 @@ def registro(request):
         usuario_form = UsuarioForm()
         normal_form = UsuarioNormalForm()
         org_form = OrganizacionForm()
+        mun_form = MunicipalidadForm()
 
     return render(request, "templatesApp/Registro.html", {
         "tipo": tipo,
         "usuario_form": usuario_form,
         "normal_form": normal_form,
         "org_form": org_form,
+        "mun_form": mun_form,
     })
 
 
@@ -347,37 +358,52 @@ def acceso(request):
 
 def donacion(request):
     """Vista para manejar donaciones alimenticias y monetarias."""
+    # Requerir sesión
     if not request.session.get('id_usuario'):
         messages.error(request, "Debes iniciar sesión para realizar una donación.")
         return redirect('acceso')
-    
+
     tipo_donacion = request.POST.get('tipo_donacion') or request.GET.get('tipo_donacion') or 'alimenticia'
-    usuario = Usuario.objects.get(id_usuario=request.session['id_usuario'])
-    
-    if request.method == 'POST':
-        if tipo_donacion == 'alimenticia':
-            form = DonacionForm(request.POST)
-            if form.is_valid():
-                donacion_obj = form.save(commit=True)
-                messages.success(request, '¡Donación alimenticia registrada exitosamente!')
-                return redirect('inicio')
-        elif tipo_donacion == 'monetaria':
-            form = DonacionMonetariaForm(request.POST)
-            if form.is_valid():
-                donacion_monetaria = form.save(commit=False)
-                donacion_monetaria.id_usuario = usuario
-                donacion_monetaria.save()
-                messages.success(request, '¡Donación monetaria registrada exitosamente!')
-                return redirect('inicio')
-    else:
-        if tipo_donacion == 'alimenticia':
-            form = DonacionForm()
+
+    error_debug = None
+    form = None
+    try:
+        usuario = Usuario.objects.get(id_usuario=request.session['id_usuario'])
+
+        if request.method == 'POST':
+            if tipo_donacion == 'alimenticia':
+                form = DonacionForm(request.POST)
+                if form.is_valid():
+                    # Guardar donación alimenticia
+                    donacion_obj = form.save()
+                    messages.success(request, '¡Donación alimenticia registrada exitosamente!')
+                    return redirect('inicio')
+            elif tipo_donacion == 'monetaria':
+                form = DonacionMonetariaForm(request.POST)
+                if form.is_valid():
+                    donacion_monetaria = form.save(commit=False)
+                    donacion_monetaria.id_usuario = usuario
+                    donacion_monetaria.save()
+                    messages.success(request, '¡Donación monetaria registrada exitosamente!')
+                    return redirect('inicio')
         else:
-            form = DonacionMonetariaForm()
-    
+            # GET: crear formularios vacíos según tipo
+            if tipo_donacion == 'alimenticia':
+                form = DonacionForm()
+            else:
+                form = DonacionMonetariaForm()
+
+    except Exception as e:
+        # Capturar traceback para depuración y mostrar en la plantilla
+        tb = traceback.format_exc()
+        error_debug = str(e)
+        # También loguear en consola
+        print('Error en vista donacion:', tb)
+
     return render(request, 'templatesApp/donacion.html', {
         'form': form,
-        'tipo_donacion': tipo_donacion
+        'tipo_donacion': tipo_donacion,
+        'error_debug': error_debug,
     })
 
 @api_view(['GET','POST'])
@@ -464,6 +490,37 @@ def ver_datos_admin(request):
     if request.user.rol == 'admin':
         return Response({'mensaje': 'Tienes acceso total al sistema'})
     return Response({'error': 'No tienes acceso total al sistema'})
+
+
+def campanas(request):
+    """Vista para que municipalidades creen y visualicen sus campañas."""
+    if not request.session.get('id_usuario'):
+        messages.error(request, "Debes iniciar sesión para acceder a campañas.")
+        return redirect('acceso')
+    
+    usuario = Usuario.objects.get(id_usuario=request.session['id_usuario'])
+    
+    # Verificar que el usuario sea municipalidad
+    if usuario.tipo_usuario != 'municipalidad':
+        messages.error(request, "Solo las municipalidades pueden acceder a campañas.")
+        return redirect('inicio')
+    
+    # Obtener todas las campañas de la municipalidad
+    campanas_list = Campana.objects.filter(id_usuario=usuario).order_by('-fecha_inicio')
+    
+    form = CampanaForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        campana = form.save(commit=False)
+        campana.id_usuario = usuario
+        campana.save()
+        messages.success(request, '¡Campaña creada exitosamente!')
+        return redirect('campanas')
+    
+    return render(request, 'templatesApp/campana.html', {
+        'form': form,
+        'campanas': campanas_list,
+    })
+
 
 def leer_publicacion(request, id_publicacion):
     try:

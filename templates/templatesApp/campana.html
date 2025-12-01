@@ -1,0 +1,211 @@
+{% extends "templatesApp/base.html" %}
+{% load static %}
+
+{% block title %}Campaña{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row">
+    <!-- Formulario de Crear Campaña -->
+    <div class="col-12 col-lg-5 mb-4">
+      <div class="card card-efecto sombra-card p-4">
+        <div class="card-body">
+          <div class="text-center mb-4">
+            <i class="bi bi-megaphone display-4 text-primary"></i>
+            <h3 class="fw-bold text-primary mt-2 mb-1">Crear Campaña</h3>
+            <p class="text-secondary small">Completa los datos para crear una nueva campaña</p>
+          </div>
+          <form method="post" class="needs-validation">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="{{ form.titulo.id_for_label }}" class="form-label fw-bold text-dark">
+                {{ form.titulo.label }}
+              </label>
+              {{ form.titulo }}
+              {% if form.titulo.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in form.titulo.errors %}
+                    <p class="mb-0">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold text-dark">
+                {{ form.descripcion.label }}
+              </label>
+              {{ form.descripcion }}
+              {% if form.descripcion.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in form.descripcion.errors %}
+                    <p class="mb-0">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label fw-bold text-dark">
+                    {{ form.fecha_inicio.label }}
+                  </label>
+                  {{ form.fecha_inicio }}
+                  {% if form.fecha_inicio.errors %}
+                    <div class="text-danger small mt-1">
+                      {% for error in form.fecha_inicio.errors %}
+                        <p class="mb-0">{{ error }}</p>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="{{ form.fecha_fin.id_for_label }}" class="form-label fw-bold text-dark">
+                    {{ form.fecha_fin.label }}
+                  </label>
+                  {{ form.fecha_fin }}
+                  {% if form.fecha_fin.errors %}
+                    <div class="text-danger small mt-1">
+                      {% for error in form.fecha_fin.errors %}
+                        <p class="mb-0">{{ error }}</p>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger" role="alert">
+                {% for error in form.non_field_errors %}
+                  <p class="mb-0">{{ error }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">
+              <i class="bi bi-plus-circle"></i> Crear Campaña
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Campañas -->
+    <div class="col-12 col-lg-7">
+      <div class="d-flex align-items-center mb-4">
+        <h3 class="fw-bold text-dark mb-0">
+          <i class="bi bi-list-check text-primary"></i> Mis Campañas
+        </h3>
+        {% if campanas.count > 0 %}
+          <span class="badge bg-primary rounded-pill ms-2">{{ campanas.count }}</span>
+        {% endif %}
+      </div>
+
+      {% if campanas %}
+        <div class="row g-3">
+          {% for campana in campanas %}
+            <div class="col-12">
+              <div class="card card-efecto sombra-card">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="flex-grow-1">
+                      <h5 class="card-title fw-bold text-dark mb-1">{{ campana.titulo }}</h5>
+                      {% if campana.descripcion %}
+                        <p class="card-text text-secondary small mb-2">{{ campana.descripcion }}</p>
+                      {% endif %}
+                    </div>
+                    <span class="badge bg-info-subtle text-info ms-2">
+                      <i class="bi bi-calendar3"></i>
+                    </span>
+                  </div>
+
+                  <div class="row text-sm mt-3">
+                    {% if campana.fecha_inicio %}
+                      <div class="col-6 col-md-6">
+                        <small class="text-muted">Inicio</small>
+                        <p class="mb-0 text-dark">
+                          <i class="bi bi-calendar-event"></i> {{ campana.fecha_inicio|date:"d/m/Y" }}
+                        </p>
+                      </div>
+                    {% endif %}
+                    {% if campana.fecha_fin %}
+                      <div class="col-6 col-md-6">
+                        <small class="text-muted">Fin</small>
+                        <p class="mb-0 text-dark">
+                          <i class="bi bi-calendar-x"></i> {{ campana.fecha_fin|date:"d/m/Y" }}
+                        </p>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {% if campana.fecha_fin %}
+                    <div class="mt-3">
+                      {% if campana.fecha_fin >= today %}
+                        <span class="badge bg-success">Activa</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Finalizada</span>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+          <i class="bi bi-info-circle me-2"></i>
+          <div>
+            <strong>Sin campañas</strong><br>
+            <small>No tienes campañas creadas. ¡Crea una nueva para comenzar!</small>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .card-efecto {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .card-efecto:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .sombra-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-control, .form-select {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  }
+
+  .btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .btn-primary:hover {
+    background-color: #0b5ed7;
+  }
+</style>
+{% endblock %}
