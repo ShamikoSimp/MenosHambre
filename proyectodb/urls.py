@@ -39,5 +39,6 @@ urlpatterns = [
     path('publicaciones/<int:pk>', views.publicacion_detail),
     path('publicaciones/list/', views.publicaciones_view, name='publicaciones'),
     path('beneficiarios/', views.beneficiarios_view, name='beneficiarios'),
+    path('donacion/', views.donacion, name='donacion'),
     path('ver/', views.ver_datos_admin),
 ]

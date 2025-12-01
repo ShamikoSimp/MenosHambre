@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import re
-from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario
+from .models import Usuario, UsuarioNormal, Organizacion, Publicacion, Beneficiario, Donacion, DonacionMonetaria
 # --- FORMULARIO PUBLICACION ---
 class PublicacionForm(forms.ModelForm):
     class Meta:
@@ -179,3 +179,46 @@ class BeneficiarioForm(forms.ModelForm):
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'}),
             'comuna': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Comuna'}),
         }
+
+
+# --- FORMULARIO DONACIÓN ALIMENTICIA ---
+class DonacionForm(forms.ModelForm):
+    class Meta:
+        model = Donacion
+        fields = ['nombre_producto', 'cantidad', 'unidad_medida', 'fecha_expiracion', 'fecha_donacion']
+        widgets = {
+            'nombre_producto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Arroz, Leche, Pan...'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 10', 'step': '0.01'}),
+            'unidad_medida': forms.Select(attrs={'class': 'form-select'}),
+            'fecha_expiracion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_donacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+    
+    def clean_nombre_producto(self):
+        nombre = self.cleaned_data.get('nombre_producto')
+        if not nombre or not nombre.strip():
+            raise ValidationError("El nombre del producto no puede quedar vacío.")
+        return nombre
+    
+    def clean_cantidad(self):
+        cantidad = self.cleaned_data.get('cantidad')
+        if cantidad is not None and cantidad <= 0:
+            raise ValidationError("La cantidad debe ser mayor a 0.")
+        return cantidad
+
+
+# --- FORMULARIO DONACIÓN MONETARIA ---
+class DonacionMonetariaForm(forms.ModelForm):
+    class Meta:
+        model = DonacionMonetaria
+        fields = ['monto', 'fecha_donacion']
+        widgets = {
+            'monto': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 10000', 'step': '100'}),
+            'fecha_donacion': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+    
+    def clean_monto(self):
+        monto = self.cleaned_data.get('monto')
+        if monto is not None and monto <= 0:
+            raise ValidationError("El monto debe ser mayor a 0.")
+        return monto

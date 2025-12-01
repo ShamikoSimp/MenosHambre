@@ -67,21 +67,27 @@ class Dependiente(models.Model):
             
         db_table = 'dependiente'
 
-
 class Donacion(models.Model):
     id_donacion = models.AutoField(primary_key=True)
-    id_publicacion = models.ForeignKey('Publicacion', models.DO_NOTHING, db_column='id_publicacion')
     nombre_producto = models.CharField(max_length=100)
     cantidad = models.IntegerField(blank=True, null=True)
     unidad_medida = models.CharField(max_length=20, blank=True, null=True)
     fecha_expiracion = models.DateField(blank=True, null=True)
-    # Fecha en que se realizó la donación (presente en el diagrama)
     fecha_donacion = models.DateField(blank=True, null=True)
 
     class Meta:
             
         db_table = 'donacion'
 
+class DonacionMonetaria(models.Model):
+    id_donacion_monetaria = models.AutoField(primary_key=True)
+    id_usuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='id_usuario')
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_donacion = models.DateField(blank=True, null=True)
+
+    class Meta:
+            
+        db_table = 'donacion_monetaria'
 
 class Municipalidad(models.Model):
     id_usuario = models.OneToOneField('Usuario', models.DO_NOTHING, db_column='id_usuario', primary_key=True)
