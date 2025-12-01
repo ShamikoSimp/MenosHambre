@@ -12,7 +12,7 @@ def crear_superusuario(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('proyectoapp', '0005_donacion_fecha_donacion_publicacion_hora_and_more.py'),  # Ajusta esto
+        ('proyectoapp', '0005_donacion_fecha_donacion_publicacion_hora_and_more'),  
     ]
 
     operations = [
