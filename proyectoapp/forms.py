@@ -252,3 +252,30 @@ class MunicipalidadForm(forms.ModelForm):
         if comuna and any(char.isdigit() for char in comuna):
             raise ValidationError("La comuna no puede contener números.")
         return comuna
+
+# --- FORMULARIO CAMPAÑA ---
+class CampanaForm(forms.ModelForm):
+    class Meta:
+        model = Campana
+        fields = ['titulo', 'descripcion', 'fecha_inicio', 'fecha_fin']
+        widgets = {
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título de la campaña'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Descripción de la campaña', 'rows': 4}),
+            'fecha_inicio': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+    
+    def clean_titulo(self):
+        titulo = self.cleaned_data.get('titulo')
+        if not titulo or not titulo.strip():
+            raise ValidationError("El título de la campaña no puede quedar vacío.")
+        return titulo
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha_inicio = cleaned_data.get('fecha_inicio')
+        fecha_fin = cleaned_data.get('fecha_fin')
+        
+        if fecha_inicio and fecha_fin and fecha_fin < fecha_inicio:
+            raise ValidationError("La fecha de fin no puede ser anterior a la fecha de inicio.")
+        return cleaned_data
