@@ -42,5 +42,5 @@ urlpatterns = [
     path('donacion/', views.donacion, name='donacion'),
     path('campanas/', views.campanas, name='campanas'),
     path('ver/', views.ver_datos_admin),
-     path('api/audio-readings/', views.audio_readings_api, name='audio_readings_api'),
+     path('audio/', views.audio_readings_api, name='audio_readings_api'),
 ]
