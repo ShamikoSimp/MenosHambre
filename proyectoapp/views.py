@@ -14,8 +14,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from .serializers import UsuarioSerializer, UsuarioNormalSerializer, OrganizacionSerializer, PublicacionSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from .serializers import UsuarioSerializer, UsuarioNormalSerializer, OrganizacionSerializer, PublicacionSerializer, AudioReadingSerializer
 from .audio_logger import registrar_lectura, obtener_todas_las_lecturas, obtener_lecturas_por_publicacion
 
 def admin_required(view_func):
@@ -580,3 +580,13 @@ def leer_publicacion(request, id_publicacion):
     )
 
     return HttpResponse(response.content, content_type="audio/mpeg")
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def audio_readings_api(request):
+    """
+    Endpoint para ver todos los textos leídos guardados en audio_readings.json
+    """
+    registros = obtener_todas_las_lecturas()
+    serializer = AudioReadingSerializer(registros, many=True)
+    return Response(serializer.data)

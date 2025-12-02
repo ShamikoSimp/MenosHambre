@@ -20,3 +20,11 @@ class PublicacionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Publicacion
         fields = '__all__'
+
+class AudioReadingSerializer(serializers.Serializer):
+    id_publicacion = serializers.IntegerField()
+    titulo = serializers.CharField()
+    texto = serializers.CharField()
+    id_usuario = serializers.IntegerField(allow_null=True)
+    fecha_hora = serializers.CharField()
+    timestamp = serializers.FloatField()
