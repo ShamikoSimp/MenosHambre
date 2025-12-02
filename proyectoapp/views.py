@@ -249,46 +249,56 @@ def registro(request):
         return render(request, "templatesApp/Registro.html", {"tipo": None})
 
     if request.method == "POST":
+        # Instanciar los formularios con POST
         usuario_form = UsuarioForm(request.POST)
-
         normal_form = UsuarioNormalForm(request.POST) if tipo == "usuario" else UsuarioNormalForm()
         org_form = OrganizacionForm(request.POST) if tipo == "organizacion" else OrganizacionForm()
         mun_form = MunicipalidadForm(request.POST) if tipo == "municipalidad" else MunicipalidadForm()
 
-        if usuario_form.is_valid():
+        # Validar todos los formularios primero, sin guardar nada en la base
+        all_valid = False
+        if tipo == "usuario":
+            if usuario_form.is_valid() and normal_form.is_valid():
+                all_valid = True
+        elif tipo == "organizacion":
+            if usuario_form.is_valid() and org_form.is_valid():
+                all_valid = True
+        elif tipo == "municipalidad":
+            if usuario_form.is_valid() and mun_form.is_valid():
+                all_valid = True
+
+        if all_valid:
+            # Guardar usuario primero
             usuario = usuario_form.save(commit=False)
             usuario.tipo_usuario = tipo
-            # La contraseña se hasheará automáticamente en el save() del modelo
             usuario.save()
 
-
-            if tipo == "usuario" and normal_form.is_valid():
+            # Guardar la entidad relacionada
+            if tipo == "usuario":
                 normal = normal_form.save(commit=False)
                 normal.id_usuario = usuario
                 normal.save()
                 messages.success(request, "Usuario registrado correctamente.")
                 return redirect("inicio")
 
-            elif tipo == "organizacion" and org_form.is_valid():
+            if tipo == "organizacion":
                 organizacion = org_form.save(commit=False)
                 organizacion.id_usuario = usuario
                 organizacion.save()
                 messages.success(request, "Organización registrada correctamente.")
                 return redirect("inicio")
-            
-            elif tipo == "municipalidad" and mun_form.is_valid():
+
+            if tipo == "municipalidad":
                 municipalidad = mun_form.save(commit=False)
                 municipalidad.id_usuario = usuario
                 municipalidad.save()
                 messages.success(request, "Municipalidad registrada correctamente.")
                 return redirect("inicio")
 
-            else:
-                usuario.delete()
-                messages.error(request, "Error en los datos del formulario.")
-
         else:
-            messages.error(request, "Error en el formulario de usuario.")
+            # No guardar nada; dejar que la plantilla muestre los errores por campo
+            # Si el usuario ya fue creado en intentos previos, no tocamos la base aquí
+            messages.error(request, "Corrige los errores en el formulario.")
 
     else:
         usuario_form = UsuarioForm()

@@ -50,6 +50,13 @@ class UsuarioForm(forms.ModelForm):
             # Validar que el email tenga un dominio válido
             if '@' not in email or '.' not in email.split('@')[1]:
                 raise ValidationError("Por favor, ingresa un correo electrónico válido con un dominio válido.")
+            # Evitar registros duplicados por email (sin distinguir mayúsculas)
+            from .models import Usuario
+            qs = Usuario.objects.filter(email__iexact=email)
+            if self.instance and getattr(self.instance, 'pk', None):
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise ValidationError("Ya existe una cuenta registrada con este correo.")
         return email
 
     def clean_contrasena(self):
@@ -110,6 +117,13 @@ class UsuarioNormalForm(forms.ModelForm):
                 raise ValidationError("El teléfono debe tener mínimo 9 caracteres.")
             if not telefono_str.isdigit():
                 raise ValidationError("El teléfono no puede contener letras, solo números.")
+            # Verificar que el teléfono no esté registrado por otro UsuarioNormal
+            from .models import UsuarioNormal
+            qs = UsuarioNormal.objects.filter(telefono=telefono)
+            if self.instance and getattr(self.instance, 'pk', None):
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise ValidationError("El teléfono ya está registrado para otro usuario.")
         return telefono
 
 
@@ -131,6 +145,13 @@ class OrganizacionForm(forms.ModelForm):
         razon_social = self.cleaned_data.get("razon_social")
         if not razon_social or not razon_social.strip():
             raise ValidationError("La razón social no puede quedar vacía.")
+        # Verificar duplicado de razón social
+        from .models import Organizacion
+        qs = Organizacion.objects.filter(razon_social__iexact=razon_social.strip())
+        if self.instance and getattr(self.instance, 'pk', None):
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Ya existe una organización registrada con esa razón social.")
         return razon_social
 
     def clean_rut(self):
@@ -139,6 +160,13 @@ class OrganizacionForm(forms.ModelForm):
             raise ValidationError("El RUT no puede quedar vacío.")
         if any(char.isalpha() for char in rut.replace('-', '').replace('.', '')):
             raise ValidationError("El RUT no puede contener letras, solo números y guiones.")
+        # Verificar duplicado de RUT
+        from .models import Organizacion
+        qs = Organizacion.objects.filter(rut__iexact=rut.strip())
+        if self.instance and getattr(self.instance, 'pk', None):
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Ya existe una organización registrada con ese RUT.")
         return rut
 
     def clean_telefono_contacto(self):
@@ -150,6 +178,13 @@ class OrganizacionForm(forms.ModelForm):
             raise ValidationError("El teléfono debe tener mínimo 9 caracteres.")
         if not telefono_str.isdigit():
             raise ValidationError("El teléfono no puede contener letras, solo números.")
+        # Verificar duplicado de teléfono para organizaciones
+        from .models import Organizacion
+        qs = Organizacion.objects.filter(telefono_contacto__iexact=str(telefono).strip())
+        if self.instance and getattr(self.instance, 'pk', None):
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("El teléfono ya está registrado para otra organización.")
         return telefono
 
     def clean_direccion(self):
@@ -239,6 +274,13 @@ class MunicipalidadForm(forms.ModelForm):
         nombre = self.cleaned_data.get('nombre_municipalidad')
         if not nombre or not nombre.strip():
             raise ValidationError("El nombre de la municipalidad no puede quedar vacío.")
+        # Verificar duplicado por nombre de municipalidad
+        from .models import Municipalidad
+        qs = Municipalidad.objects.filter(nombre_municipalidad__iexact=nombre.strip())
+        if self.instance and getattr(self.instance, 'pk', None):
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Ya existe una municipalidad con ese nombre.")
         return nombre
     
     def clean_region(self):
